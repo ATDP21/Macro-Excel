@@ -17,3 +17,36 @@ la noche).
 Gracias a esta automatización la empresa pudo asignar y ampliar las funciones de los trabajadores, por lo que pasaron de 3 a 4 personas documentando
 parones justificados o injustificados a recoger además datos de irradiancia (cumplido después por mi programa), para estudiar si los parones ocurrían 
 a razón de picos de radiación solar, todo con un solo clic y un fácil recorte de tablas en 15 min por un solo trabajador.
+
+    ____________________________________________________________________________________________________________________________
+
+Para probar la Macro hay que quitar una configuración de seguridad sobre el uso de macros viniendo de terceros, no se tarda nada, y la Macros se puede analizar, 
+está documentada y limpiada, solo hay que presionar Alt + F11 estando con el Excel abierto, pondré un .txt con la Macro extraida para transparencia. Si se quiere 
+probar bien además se debería borrar el ejemplo de incidencias, y darle al botón de Iniciar en la pestaña "Incidencias", tarda en cargar y se bloquea el Excel por
+unos segundos, pondrá que no responde, pero a lo máximo de un par de minutos lo carga todo.
+
+
+*Datos de inversores:*
+
+<img width="1167" height="985" alt="image" src="https://github.com/user-attachments/assets/940c179d-e9ab-4090-8df4-04ae8287a1a6" />
+
+
+
+*Datos de regulación:*
+
+<img width="1199" height="993" alt="image" src="https://github.com/user-attachments/assets/a5644524-56ba-4e23-9a50-46e3aa11bf6a" />
+
+
+
+*Datos de irradiancia:*
+
+<img width="573" height="1015" alt="image" src="https://github.com/user-attachments/assets/a22c152d-04fe-400d-b2e2-3c7bd0e97d51" />
+
+
+
+*Datos procesados por programa de incidencias de haber sido justificadas o no, la empresa necesita los dos datos, ordenados por inversores:*
+
+<img width="1407" height="1021" alt="image" src="https://github.com/user-attachments/assets/de7f3c3b-f11c-4812-8005-adadca971133" />
+
+
+
