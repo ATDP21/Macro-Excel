@@ -1,0 +1,200 @@
+Option Explicit
+
+Sub AnalizarIncidencias()
+    ' Activa la hoja Datos para poder trabajar con ella
+    Worksheets("Datos").Activate
+    
+    ' Intentamos que el rango de datos sea dinámico, indicandole a la macho que busque las posiciones
+    ' iniciales y finales para poder analizar desde horas a días completos
+    'Usamnos As Long siempre que nos sea posible para que el rango de datos a analizar sea mucho mayor
+    
+    Dim posInicio As Integer, posFinal As Long
+    posInicio = 2
+    posFinal = ActiveSheet.UsedRange.Rows.Count
+    
+    ' Se usan dos índices para anotar cuándo empieza a bajar la potencia y
+    ' cuando sube. En este caso se ha definido la potencia baja como '1'
+    
+    Dim potenciaMinima As Long, inicioBajada As Long, finBajada As Long
+    Dim fila As Long, columna As Long, i As Long
+    Dim regulacionEncontrada As Boolean
+    
+    potenciaMinima = 1
+    inicioBajada = 0
+    finBajada = 0
+    
+    ' Este booleano es sólo para mostrar un mensaje más adelante
+      Dim seHanEncontradoIncidencias As Boolean
+      seHanEncontradoIncidencias = False
+    
+    ' La columna B sería la 2, la C sería la 3, etc.
+        For columna = 2 To 13
+        ' Obtener el nombre del inversor desde la primera celda de la columna
+        Dim nombreInversor As String
+        nombreInversor = Cells(1, columna).Value
+
+        For fila = posInicio To posFinal
+            Dim valor As Double
+            valor = Cells(fila, columna).Value
+
+         ' Si la potencia ha bajado en la fila actual se anota en la misma celda
+         ' escrito según la frase que hemos programado en la última Subrutina
+            If valor < potenciaMinima And inicioBajada = 0 Then
+                 inicioBajada = fila
+            End If
+
+                ' Si la potencia ya estaba baja y ha subido en esta fila se anota en
+                ' 'fechaInicio'. Además de ello, se anotan los datos en la hoja 'incidencias'
+                ' y se reinician las variables usadas para poder encontrar incidencias
+                ' adicionales en la misma columna donde se está buscando.
+            If inicioBajada > 0 And valor >= potenciaMinima Then
+                    finBajada = fila
+                    Dim valorSP As Double
+                    valorSP = VerificarRegulacionSP(Cells(inicioBajada, 1), columna, nombreInversor)  ' Llama a la función que nos dice si han habido regulaciones o no
+                
+                    ' Guardar la incidencia en forma de frase
+                    GuardarIncidencias nombreInversor, Cells(inicioBajada, 1), Cells(finBajada, 1), valorSP
+
+                    inicioBajada = 0
+                    finBajada = 0
+                    seHanEncontradoIncidencias = True
+            End If
+
+        Next fila
+    Next columna
+    
+    ' Muestra un mensaje en función de si ha encontrado o no incidencias
+    If seHanEncontradoIncidencias = True Then
+        MsgBox "Se han encontrado incidencias, y se han guardado en la hoja 'Incidencias'", _
+        vbOKOnly, _
+        "Macro de analizar incidencias"
+        
+        ' Se mantiene como visible la hoja 'Datos'
+        Worksheets("Incidencias").Activate
+    Else
+        MsgBox "Ninguna incidencia encontrada", _
+        vbOKOnly, _
+        "Macro de analizar incidencias"
+    End If
+    
+End Sub
+Function VerificarRegulacionSP(horaDatos As Date, columna As Variant, nombreInversor As String) As Double
+    ' Activamos la hoja SP para realizar la comprobación
+    ' Todas las siguientes lineas, tal como en la primera Subrutina
+    ' Definen los elementos que interfieren en la Funcion que usaremos
+    ' Parar obtener facilmente si hubo o no regulación y el valor al que se produjo esa regulación
+    
+    Dim hojaSP As Worksheet
+    Set hojaSP = Worksheets("SP")
+    Dim filaSP As Long, posFinal As Long
+    Dim i As Long
+    i = 0
+    filaSP = 0
+    
+    posFinal = hojaSP.UsedRange.Rows.Count
+    'Con el siguiente sistema de localización iguala el valor de la regulación
+    'al que lee en la celda correspondiente de la hoja SP, donde coincide con la hoja Datos
+    'Después en el segundo bucle dividiremos el valor entre 100, ya que nos daba
+    'el valor inflado por 100 en la hoja incidencias. A día de hoy no sabemos por qué
+    For i = 2 To posFinal
+        If hojaSP.Cells(i, 1).Value = horaDatos Then
+            filaSP = i
+            Exit For
+        End If
+    Next i
+    
+    ' Retornamos el valor de la celda ubicada en fila y columna a la hoja incidencias, columna B
+    ' Después interpretando a nuestro criterio si hubo o no hubo regulación escribe la frase correspondiente
+    VerificarRegulacionSP = hojaSP.Cells(filaSP, columna).Value
+End Function
+Function EscribirIrradiancias(horaDatos As Date) As String()
+    ' Esta función nos servirá para hacer un listado de los
+    ' cuatro valores de irradiancia que coge el informe diario
+    Dim z As Long
+    z = 0
+    Dim i As Long
+    i = 0
+    Dim listaIrradiancia(3) As String
+    Dim hojaIrradiancia As Worksheet
+    Set hojaIrradiancia = Worksheets("Irradiancia")
+    Dim filaIrradiancia As Long
+    Dim posFinal As Long
+    Dim columnaIrradiacion As Integer
+    
+    posFinal = hojaIrradiancia.UsedRange.Rows.Count
+    For i = 2 To posFinal ' Localiza las celdas correctas según toooodo lo anterior
+        If hojaIrradiancia.Cells(i, 1).Value = horaDatos Then
+            filaIrradiancia = i
+            Exit For
+        End If
+    Next i
+        ' Segundo bucle que nos apunta los valores que hay dentro de esas celdas localizadas
+        ' No sabemos si este o el anterior están dando problemas de bucle infinito
+        For columnaIrradiacion = 2 To 5
+            listaIrradiancia(z) = hojaIrradiancia.Cells(filaIrradiancia, columnaIrradiacion).Value
+            z = z + 1
+        Next columnaIrradiacion
+        EscribirIrradiancias = listaIrradiancia()
+End Function
+Sub GuardarIncidencias(dispositivo As String, fechaInicio As Date, fechaFin As Date, regulacionEncontrada As Double)
+    ' Se activa la hora de incidencias para poder trabajar con ella
+    
+    Dim fraseIrradiancia As String
+    Dim listaIrradiancia() As String
+    
+    listaIrradiancia() = EscribirIrradiancias(fechaInicio) ' Definimos la columna por la que se guiarán las irradiancias que debemos coger
+    
+    Worksheets("Incidencias").Activate
+    
+    ' Se busca cuál es la primera fila que está vacía para poder escribir en
+    ' ella. Cuenta hasta 10000 para no hacer un bucle infinito, y en caso de no
+    ' encontrar ninguna, devuelve un error
+    
+    Dim i As Long
+    i = 0
+    Dim fila As Integer
+    fila = -1
+    Dim frase As String
+    Dim fraseRegulacion As String
+    
+    
+    For i = 2 To 10000
+        If IsEmpty(Cells(i, 1)) = True Then
+            fila = i
+            Exit For
+        End If
+    Next i
+
+    If fila < 0 Then
+        Err.Raise vbObjectError + 1, "Módulo1.GuardarIncidencias", _
+            "Error buscando una columna vacía en la que guardar una incidencia"
+    End If
+    
+    ' Se escribe en la primera fila vacía disponible los datos en el siguiente orden:
+    ' Nombre del dispositivo, fecha inicio incidencia, fecha de fin de incidencia
+    ' en el que se ha producido dicha incidencia
+    
+    frase = "- El " & dispositivo & " tuvo una parada desde el " & fechaInicio & " hasta el " & fechaFin & ":"
+    fraseIrradiancia = " Con irradiancias de " & listaIrradiancia(0) & ", " & listaIrradiancia(1) & ", " & listaIrradiancia(2) & "y " & listaIrradiancia(3) & " W/m^2."
+    
+    ' En la segunda celda se completará la frase:
+    ' Se escribirá Si hubo regulación, o no, leyendo los datos de la hoja SP
+    ' y según el criterio que le damos y es facilmente interpretable escribirá una frase u otra
+    ' Además, se diferenciaran por color para que en una lista sean facilmente diferenciables
+    If regulacionEncontrada = 2670 Then
+        fraseRegulacion = "No hubo regulación para este inversor a esa hora"
+        Cells(fila, 2).Value = fraseRegulacion
+        Cells(fila, 2).Font.Color = RGB(255, 0, 0) ' Rojo
+    Else
+               'Aquí el temita de dividir entre 100 y además que nos añada dos decimales
+        fraseRegulacion = "Hubo regulación para este inversor a esa hora a " & Format(regulacionEncontrada / 100, "0.00") & "kW"
+        Cells(fila, 2).Font.Color = RGB(0, 128, 0) ' Verde
+    End If
+    
+    Cells(fila, 1).Value = frase ' La frase completa se escribe en la columna A
+    Cells(fila, 2).Value = fraseRegulacion ' Frase para decir si había o no había regulación
+    Cells(fila, 3).Value = fraseIrradiancia ' Frase que nos da el listado de irradiancias
+    Cells(fila, 4).Value = fechaInicio ' Para ordenar las regulaciones por hora
+    Worksheets("Datos").Activate
+
+End Sub
