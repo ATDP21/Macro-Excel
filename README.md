@@ -1,9 +1,10 @@
 # Macro-Excel
 Este es el resultado de un proyecto que trataba de automatizar un proceso lento y tedioso que ejercian 3 a 4 trabajadores diariamente. 
-Se destinó y es usado hoy en día en la empresa que trabaja mi hermano que fue quien me hizo la petición, me explicó los requisitos y me apoyó. 
+Se destinó y es usado hoy en día en la empresa que trabaja mi hermano, que fue quien me hizo la petición, me explicó los requisitos y 
+las necesidades a cubrir. 
 
 
-En esta gran empresa gestora de plantas fotovoltaicas el problema venía de datos segundo a segundo de diferentes inversores (dispositivos 
+En esta gran empresa de infraestructuras energéticas el problema venía de datos segundo a segundo de diferentes inversores (dispositivos 
 electrónicos que convierten la energía continua a energía alterna de los paneles solares) que estaban dando problemas ya que estos paraban
 bruscamente o reducian su producción cuando no debían. Esta salida de energía está regulada para proporcionar X Kw/s, en caso de no necesitarse
 por un momento el requisito se reduce o cae a 0. Comprobando entonces la tabla en el segundo específico del parón del inversor se podía saber
